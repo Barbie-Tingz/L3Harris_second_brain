@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>✦ second brain — GMT converter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#f0c8e0;--check1:#f5d0e8;--check2:#e8b8d8;--win-title:#9870c0;
+    --win-title2:#c8a0e0;--win-body:#f0e8f8;--win-border-light:#ffffff;
+    --win-border-dark:#806090;--win-border-darker:#503060;--pink:#e878a8;
+    --lavender:#b090d8;--text:#301840;--text2:#604878;--link:#9030b0;
+    --btn-face:#d8c8f0;--btn-hi:#ffffff;--btn-sh:#806090;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'VT323',monospace;font-size:17px;background-color:var(--bg);
+    background-image:repeating-conic-gradient(var(--check1) 0% 25%,var(--check2) 0% 50%);
+    background-size:16px 16px;color:var(--text);min-height:100vh;padding-bottom:52px;}
+    a{color:var(--link);text-decoration:none;}a:hover{text-decoration:underline;}
+    .window{background:var(--win-body);border:2px solid;
+    border-color:var(--win-border-light) var(--win-border-dark) var(--win-border-dark) var(--win-border-light);
+    outline:1px solid var(--win-border-darker);margin-bottom:10px;}
+    .win-title{background:linear-gradient(90deg,var(--win-title),var(--win-title2));
+    color:white;font-family:'Press Start 2P',monospace;font-size:8px;padding:4px 6px;
+    display:flex;align-items:center;gap:6px;user-select:none;}
+    .win-btns{display:flex;gap:2px;margin-left:auto;}
+    .win-btn{width:16px;height:14px;background:var(--btn-face);border:1px solid;
+    border-color:var(--btn-hi) var(--btn-sh) var(--btn-sh) var(--btn-hi);
+    font-size:11px;color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+    .win-body{padding:12px;}
+    .win-statusbar{border-top:1px solid var(--win-border-dark);padding:2px 6px;
+    font-size:13px;color:var(--text2);background:var(--btn-face);}
+    .px-hr{border:none;border-top:2px solid var(--btn-sh);border-bottom:1px solid var(--btn-hi);margin:8px 0;}
+    .inset{background:white;border:2px solid;
+    border-color:var(--btn-sh) var(--btn-hi) var(--btn-hi) var(--btn-sh);padding:10px;margin:6px 0;}
+    .bevel-btn{background:var(--btn-face);border:2px solid;
+    border-color:var(--btn-hi) var(--btn-sh) var(--btn-sh) var(--btn-hi);
+    color:var(--text);font-family:'VT323',monospace;font-size:16px;padding:4px 12px;
+    cursor:pointer;display:inline-flex;align-items:center;gap:4px;margin:4px 2px;text-decoration:none;}
+    .bevel-btn:hover{background:#e8d8ff;}
+    .bevel-btn:active{border-color:var(--btn-sh) var(--btn-hi) var(--btn-hi) var(--btn-sh);}
+    .nav-links{list-style:none;padding:4px;}
+    .nav-links li{border-bottom:1px dotted var(--lavender);}
+    .nav-links a{display:block;padding:5px 4px;color:var(--link);font-size:14px;}
+    .nav-links a:hover,.nav-links a.active{background:var(--win-title);color:white;text-decoration:none;}
+    .retro-table{width:100%;border-collapse:collapse;font-size:15px;}
+    .retro-table th{background:var(--win-title);color:white;font-family:'Press Start 2P',monospace;
+    font-size:6px;padding:5px 8px;text-align:left;border:1px solid var(--win-border-dark);}
+    .retro-table td{padding:5px 8px;border:1px solid #d0b8e8;background:white;vertical-align:middle;}
+    .retro-table tr:hover td{background:#f0e0ff;cursor:pointer;}
+    .retro-table tr:nth-child(even) td{background:#faf0ff;}
+    .retro-table tr:nth-child(even):hover td{background:#f0e0ff;}
+    .tag{font-family:'Press Start 2P',monospace;font-size:6px;padding:2px 5px;border:1px solid;display:inline-block;}
+    .tag-active{background:#d8ffd8;color:#108020;border-color:#40c040;}
+    .tag-pending{background:#fff0d8;color:#a06010;border-color:#e0a040;}
+    .tag-closed{background:#e8e8e8;color:#505050;border-color:#a0a0a0;}
+    .tag-nom{background:#ffd8f0;color:#c02880;border-color:#e060a0;}
+    .tag-proj{background:#d8e8ff;color:#1840c0;border-color:#4080e0;}
+    .tag-email{background:#d8ffd8;color:#108020;border-color:#40c040;}
+    .tag-doc{background:#e8d8ff;color:#6020c0;border-color:#9060e0;}
+    .blinkme{animation:blink 1s step-end infinite;color:var(--pink);}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+    .marquee-wrap{overflow:hidden;background:var(--win-title);color:white;font-size:13px;padding:2px 0;margin-bottom:10px;}
+    .marquee-inner{display:inline-block;white-space:nowrap;animation:marquee 16s linear infinite;}
+    @keyframes marquee{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+    #taskbar{position:fixed;bottom:0;left:0;right:0;background:var(--btn-face);
+    border-top:2px solid var(--btn-hi);display:flex;align-items:center;
+    gap:4px;padding:3px 8px;z-index:1000;flex-wrap:nowrap;overflow-x:auto;}
+    .taskbar-clock{margin-left:auto;font-family:'Press Start 2P',monospace;font-size:8px;
+    background:var(--btn-face);border:1px inset var(--btn-sh);padding:4px 8px;color:var(--text);white-space:nowrap;}
+    .taskbar-sep{width:2px;height:20px;background:var(--btn-sh);border-right:1px solid var(--btn-hi);flex-shrink:0;}
+    #app{max-width:1160px;margin:0 auto;padding:12px 16px;}
+    #header{text-align:center;padding:10px 0 6px;}
+    #header h1{font-family:'Press Start 2P',monospace;font-size:clamp(12px,2vw,24px);
+    color:var(--win-title);text-shadow:3px 3px 0 #fff,4px 4px 0 var(--win-border-dark);line-height:1.5;}
+    #header .subtitle{font-size:17px;color:var(--text2);margin-top:4px;}
+    #date-display{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--text2);text-align:center;margin:4px 0 8px;}
+    .iconbar{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:6px 0 10px;}
+    .icon-item{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:var(--text);}
+    .icon-item .ico{width:40px;height:40px;font-size:22px;display:flex;align-items:center;justify-content:center;
+    background:var(--btn-face);border:2px solid;border-color:var(--btn-hi) var(--btn-sh) var(--btn-sh) var(--btn-hi);}
+    .icon-item .ico:hover{background:#e8d8ff;border-color:var(--btn-sh) var(--btn-hi) var(--btn-hi) var(--btn-sh);}
+    .icon-item span{font-family:'Press Start 2P',monospace;font-size:5px;text-align:center;text-shadow:1px 1px 0 white;}
+    .layout{display:grid;grid-template-columns:180px 1fr;gap:10px;align-items:start;}
+    .breadcrumb{font-size:14px;color:var(--text2);margin-bottom:10px;}
+    .pixel-input{background:white;border:2px solid;border-color:var(--btn-sh) var(--btn-hi) var(--btn-hi) var(--btn-sh);
+    font-family:'VT323',monospace;font-size:16px;padding:4px 6px;color:var(--text);outline:none;}
+    .pixel-input:focus{background:#faf0ff;}
+    textarea.pixel-input{width:100%;resize:vertical;line-height:1.6;}
+    h2{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--win-title);margin:12px 0 6px;line-height:1.6;}
+    h3{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--text2);margin:8px 0 4px;line-height:1.6;}
+    .field-row{display:grid;grid-template-columns:160px 1fr;gap:4px;border-bottom:1px dotted var(--lavender);padding:5px 0;font-size:16px;}
+    .field-label{color:var(--text2);}
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:8px 0;}
+    .pixel-card{background:var(--btn-face);border:2px solid;border-color:var(--btn-hi) var(--btn-sh) var(--btn-sh) var(--btn-hi);
+    padding:10px;text-decoration:none;display:block;color:var(--text);}
+    .pixel-card:hover{background:#e8d8ff;border-color:var(--btn-sh) var(--btn-hi) var(--btn-hi) var(--btn-sh);}
+    .pixel-card .card-icon{font-size:20px;margin-bottom:4px;}
+    .pixel-card .card-title{font-family:'Press Start 2P',monospace;font-size:6px;color:var(--win-title);margin-bottom:4px;}
+    .pixel-card .card-desc{font-size:13px;color:var(--text2);line-height:1.3;}
+    .copy-btn{background:var(--btn-face);border:1px solid;border-color:var(--btn-hi) var(--btn-sh) var(--btn-sh) var(--btn-hi);
+    font-family:'VT323',monospace;font-size:13px;padding:2px 6px;cursor:pointer;color:var(--text);}
+    .copy-btn:hover{background:#e8d8ff;}
+    ::-webkit-scrollbar{width:12px;}::-webkit-scrollbar-track{background:var(--btn-face);}
+    ::-webkit-scrollbar-thumb{background:var(--lavender);border:2px solid;border-color:var(--btn-hi) var(--btn-sh) var(--btn-sh) var(--btn-hi);}
+
+  .clock-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;}
+  .clock-box{background:white;border:2px solid;border-color:var(--btn-sh) var(--btn-hi) var(--btn-hi) var(--btn-sh);padding:12px;text-align:center;}
+  .clock-label{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--text2);margin-bottom:8px;}
+  .clock-time{font-family:'Press Start 2P',monospace;font-size:20px;color:var(--win-title);letter-spacing:2px;}
+  .clock-date{font-size:13px;color:var(--text2);margin-top:4px;}
+  .converter-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;}
+  .tz-block{background:white;border:2px solid;border-color:var(--btn-sh) var(--btn-hi) var(--btn-hi) var(--btn-sh);padding:12px;}
+  .tz-label{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--win-title);margin-bottom:8px;}
+  .tz-input{width:100%;font-family:'VT323',monospace;font-size:22px;border:none;outline:none;color:var(--text);background:transparent;text-align:center;}
+  .arrow-btn{background:var(--win-title);color:white;border:2px solid;border-color:var(--btn-hi) var(--btn-sh) var(--btn-sh) var(--btn-hi);font-size:20px;padding:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .arrow-btn:hover{background:var(--win-title2);}
+  .ref-table-wrap{overflow-x:auto;}
+  .dst-note{background:#fff8e8;border:1px solid #e0c040;padding:6px 10px;font-size:14px;color:#604010;margin:6px 0;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <h1>✦ SECOND BRAIN ✦</h1>
+    <div id="date-display"></div>
+    <div class="subtitle">🌍 GMT ↔ EST converter</div>
+  </div>
+  <div class="iconbar"><a class="icon-item" href="index.html"><div class="ico">🏠</div><span>HOME</span></a>
+<a class="icon-item" href="cases.html"><div class="ico">🗂️</div><span>CASES</span></a>
+<a class="icon-item" href="wiki-drafts.html"><div class="ico">📄</div><span>DRAFTS</span></a>
+<a class="icon-item" href="quick-notes.html"><div class="ico">⚡</div><span>NOTES</span></a>
+<a class="icon-item" href="rise-award.html"><div class="ico">🏆</div><span>RISE</span></a>
+<a class="icon-item" href="path-references.html"><div class="ico">🗺️</div><span>PATHS</span></a>
+<a class="icon-item" href="templates.html"><div class="ico">📁</div><span>TMPLS</span></a>
+<a class="icon-item" href="gmt-conversion.html"><div class="ico">🌍</div><span>GMT</span></a>
+</div>
+  <div class="marquee-wrap"><div class="marquee-inner">🌍 gmt tool ✦ live clocks ✦ convert GMT ↔ EST instantly ✦ includes DST awareness ✦ for case time tracking ✦</div></div>
+  <div class="layout">
+    
+    <div class="window">
+      <div class="win-title"><span>💾</span><span style="flex:1">navigation</span><div class="win-btns"><div class="win-btn">_</div><div class="win-btn">□</div><div class="win-btn">✕</div></div></div>
+      <div class="win-body">
+        <ul class="nav-links"><li><a href="index.html">🏠 home</a></li>
+<li><a href="cases.html">🗂️ cases</a></li>
+<li><a href="wiki-drafts.html">📄 wiki drafts</a></li>
+<li><a href="quick-notes.html">⚡ quick notes</a></li>
+<li><a href="rise-award.html">🏆 rise award</a></li>
+<li><a href="path-references.html">🗺️ path refs</a></li>
+<li><a href="templates.html">📁 templates</a></li>
+<li><a href="gmt-conversion.html" class="active">🌍 gmt tool</a></li>
+</ul>
+      </div>
+      <div class="win-statusbar">📁 second brain</div>
+    </div>
+    <div>
+
+      <!-- LIVE CLOCKS -->
+      <div class="window">
+        <div class="win-title"><span>🕐</span><span style="flex:1">live clocks</span><div class="win-btns"><div class="win-btn">_</div><div class="win-btn">□</div><div class="win-btn">✕</div></div></div>
+        <div class="win-body">
+          <div class="clock-grid">
+            <div class="clock-box">
+              <div class="clock-label">GMT / UTC</div>
+              <div class="clock-time" id="live-gmt">--:--:--</div>
+              <div class="clock-date" id="live-gmt-date"></div>
+            </div>
+            <div class="clock-box">
+              <div class="clock-label" id="est-label">EST (UTC-5)</div>
+              <div class="clock-time" id="live-est">--:--:--</div>
+              <div class="clock-date" id="live-est-date"></div>
+            </div>
+          </div>
+          <div class="dst-note" id="dst-note">⏰ checking daylight saving status...</div>
+        </div>
+        <div class="win-statusbar">live clocks | updates every second</div>
+      </div>
+
+      <!-- CONVERTER -->
+      <div class="window">
+        <div class="win-title"><span>🔄</span><span style="flex:1">converter — enter a time to convert</span><div class="win-btns"><div class="win-btn">_</div><div class="win-btn">□</div><div class="win-btn">✕</div></div></div>
+        <div class="win-body">
+          <div style="font-size:14px;color:var(--text2);margin-bottom:10px">
+            Enter a time in either field and press Convert. Use 24-hour format (e.g. 14:30) or 12-hour (e.g. 2:30 PM).
+          </div>
+          <div class="converter-grid">
+            <div class="tz-block">
+              <div class="tz-label">GMT / UTC</div>
+              <input class="tz-input" id="gmt-input" type="text" placeholder="e.g. 14:30" />
+              <div style="font-size:12px;color:var(--text2);text-align:center;margin-top:4px">UTC+0</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <button class="arrow-btn" onclick="convertGMTtoEST()" title="GMT → EST">▶<span style="font-size:10px;font-family:'Press Start 2P'">to EST</span></button>
+              <button class="arrow-btn" onclick="convertESTtoGMT()" title="EST → GMT">◀<span style="font-size:10px;font-family:'Press Start 2P'">to GMT</span></button>
+            </div>
+            <div class="tz-block">
+              <div class="tz-label" id="est-conv-label">EST (UTC-5)</div>
+              <input class="tz-input" id="est-input" type="text" placeholder="result" />
+              <div style="font-size:12px;color:var(--text2);text-align:center;margin-top:4px" id="offset-note">UTC-5 (standard) / UTC-4 (daylight)</div>
+            </div>
+          </div>
+          <div class="px-hr"></div>
+          <div id="conversion-result" style="font-family:'Press Start 2P';font-size:8px;color:var(--win-title);min-height:20px;text-align:center"></div>
+        </div>
+        <div class="win-statusbar">converter | DST-aware</div>
+      </div>
+
+      <!-- QUICK REFERENCE TABLE -->
+      <div class="window">
+        <div class="win-title"><span>📋</span><span style="flex:1">quick reference table — GMT to EST</span><div class="win-btns"><div class="win-btn">_</div><div class="win-btn">□</div><div class="win-btn">✕</div></div></div>
+        <div class="win-body">
+          <div class="dst-note">📌 Standard Time (Nov–Mar): EST = GMT - 5 hours &nbsp;|&nbsp; Daylight Time (Mar–Nov): EDT = GMT - 4 hours</div>
+          <div class="ref-table-wrap">
+            <table class="retro-table">
+              <thead>
+                <tr><th>GMT / UTC</th><th>EST (UTC-5)</th><th>EDT (UTC-4)</th><th>notes</th></tr>
+              </thead>
+              <tbody id="ref-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="win-statusbar">reference table | 24-hour format</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div id="taskbar">
+      <button style="background:var(--btn-face);border:2px solid;border-color:var(--btn-hi) var(--btn-sh) var(--btn-sh) var(--btn-hi);font-family:'Press Start 2P',monospace;font-size:8px;padding:3px 8px;cursor:pointer;color:var(--text)">🌸 START</button>
+      <div class="taskbar-sep"></div>
+      <a href="index.html"><button class="bevel-btn" style="font-size:10px;padding:2px 6px">🏠</button></a>
+<a href="cases.html"><button class="bevel-btn" style="font-size:10px;padding:2px 6px">🗂️</button></a>
+<a href="wiki-drafts.html"><button class="bevel-btn" style="font-size:10px;padding:2px 6px">📄</button></a>
+<a href="quick-notes.html"><button class="bevel-btn" style="font-size:10px;padding:2px 6px">⚡</button></a>
+<a href="rise-award.html"><button class="bevel-btn" style="font-size:10px;padding:2px 6px">🏆</button></a>
+<a href="path-references.html"><button class="bevel-btn" style="font-size:10px;padding:2px 6px">🗺️</button></a>
+<a href="templates.html"><button class="bevel-btn" style="font-size:10px;padding:2px 6px">📁</button></a>
+<a href="gmt-conversion.html"><button class="bevel-btn" style="font-size:10px;padding:2px 6px">🌍</button></a>
+
+      <div class="taskbar-clock" id="clock">00:00</div>
+    </div>
+<script>
+    function updateClock(){const n=new Date();document.getElementById('clock').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
+    updateClock();setInterval(updateClock,10000);
+    const _days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const _months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const _n=new Date();
+    const _dd=document.getElementById('date-display');
+    if(_dd)_dd.textContent=_days[_n.getDay()]+' '+_months[_n.getMonth()]+' '+_n.getDate()+', '+_n.getFullYear();
+    </script>
+<script>
+// ── LIVE CLOCKS ──────────────────────────────────────────────────────────────
+function isDST(date){
+  // US DST: 2nd Sunday March → 1st Sunday November
+  const year=date.getUTCFullYear();
+  const dstStart=new Date(Date.UTC(year,2,8));
+  dstStart.setUTCDate(8+(7-dstStart.getUTCDay())%7);
+  const dstEnd=new Date(Date.UTC(year,10,1));
+  dstEnd.setUTCDate(1+(7-dstEnd.getUTCDay())%7);
+  return date>=dstStart && date<dstEnd;
+}
+function pad(n){return String(n).padStart(2,'0');}
+function formatTime(d){return pad(d.getUTCHours())+':'+pad(d.getUTCMinutes())+':'+pad(d.getUTCSeconds());}
+function formatDate(d){
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return days[d.getUTCDay()]+' '+months[d.getUTCMonth()]+' '+d.getUTCDate()+', '+d.getUTCFullYear();
+}
+function updateLiveClocks(){
+  const now=new Date();
+  const dst=isDST(now);
+  const offset=dst?-4:-5;
+  const estMs=now.getTime()+(offset*3600000);
+  const estDate=new Date(estMs);
+  document.getElementById('live-gmt').textContent=formatTime(now);
+  document.getElementById('live-gmt-date').textContent=formatDate(now);
+  document.getElementById('live-est').textContent=formatTime(estDate);
+  document.getElementById('live-est-date').textContent=formatDate(estDate);
+  const lbl=dst?'EDT (UTC-4)':'EST (UTC-5)';
+  document.getElementById('est-label').textContent=lbl;
+  document.getElementById('est-conv-label').textContent=lbl;
+  document.getElementById('dst-note').textContent=dst
+    ?'🌞 Daylight Saving Time is ACTIVE — EDT (UTC-4) in effect'
+    :'❄️ Standard Time is ACTIVE — EST (UTC-5) in effect';
+}
+setInterval(updateLiveClocks,1000); updateLiveClocks();
+
+// ── CONVERTER ────────────────────────────────────────────────────────────────
+function parseTime(str){
+  str=str.trim().toUpperCase();
+  const pm=str.includes('PM');
+  const am=str.includes('AM');
+  str=str.replace(/[APM]/g,'').trim();
+  let [h,m]=(str.includes(':'))?str.split(':').map(Number):[parseInt(str),0];
+  if(pm && h!==12) h+=12;
+  if(am && h===12) h=0;
+  return {h,m};
+}
+function fmt12(h,m){
+  const ampm=h>=12?'PM':'AM';
+  const hh=h%12||12;
+  return pad(hh)+':'+pad(m)+' '+ampm;
+}
+function fmtBoth(h,m){return pad(h)+':'+pad(m)+' ('+fmt12(h,m)+')';}
+function convertGMTtoEST(){
+  try{
+    const {h,m}=parseTime(document.getElementById('gmt-input').value);
+    const dst=isDST(new Date());
+    const off=dst?-4:-5;
+    let eh=(h+off+24)%24;
+    document.getElementById('est-input').value=fmtBoth(eh,m);
+    document.getElementById('conversion-result').textContent=pad(h)+':'+pad(m)+' GMT → '+fmtBoth(eh,m)+' '+(dst?'EDT':'EST');
+  }catch(e){document.getElementById('conversion-result').textContent='⚠ enter a valid time like 14:30 or 2:30 PM';}
+}
+function convertESTtoGMT(){
+  try{
+    const {h,m}=parseTime(document.getElementById('est-input').value);
+    const dst=isDST(new Date());
+    const off=dst?4:5;
+    let gh=(h+off)%24;
+    document.getElementById('gmt-input').value=fmtBoth(gh,m);
+    document.getElementById('conversion-result').textContent=pad(h)+':'+pad(m)+' '+(dst?'EDT':'EST')+' → '+fmtBoth(gh,m)+' GMT';
+  }catch(e){document.getElementById('conversion-result').textContent='⚠ enter a valid time like 14:30 or 2:30 PM';}
+}
+
+// ── REFERENCE TABLE ──────────────────────────────────────────────────────────
+const tbody=document.getElementById('ref-body');
+for(let g=0;g<24;g++){
+  const est=(g-5+24)%24;
+  const edt=(g-4+24)%24;
+  const notes=g===0?'midnight UTC':g===12?'noon UTC':g===9?'common case filing time':'';
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><b>${pad(g)}:00</b></td><td>${pad(est)}:00 ${fmt12(est,0)}</td><td>${pad(edt)}:00 ${fmt12(edt,0)}</td><td style="color:var(--text2);font-size:13px">${notes}</td>`;
+  tbody.appendChild(tr);
+}
+</script>
+</body></html>
